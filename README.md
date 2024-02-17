@@ -2,7 +2,7 @@
 Nombre: Angel Enrique Alvarado Ruiz
 
 
-Carnet: 2022096714
+Carnet: 202209714
 
 
 Semestre: Primer semestre 2024
