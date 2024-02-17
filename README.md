@@ -1,2 +1,8 @@
 # LFP_P1_202209714
-Primer Practica de Lenguajes Formales y de Programación sección B+
+Nombre: Angel Enrique Alvarado Ruiz
+
+
+Carnet: 2022096714
+
+
+Semestre: Primer semestre 2024
