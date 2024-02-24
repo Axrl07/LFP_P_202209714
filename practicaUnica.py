@@ -1,3 +1,6 @@
+# imports
+from graphviz import Digraph
+
 # clases para peliculas y artistas
 class Pelicula:
     def __init__(self, titulo="vacio", estreno="vacio", genero="vacio"):
@@ -46,15 +49,18 @@ class App:
         self.listadoGeneros = []
         self.listadoEstrenos = []
     
-    # apartado de carga de archivos
+    # apartado de carga de archivos 
     def configurarListados(self):
         for pelicula in self.listadoPeliculas:
-            if pelicula.genero not in self.listadoGeneros:
-                self.listadoGeneros.append(pelicula.genero)
             if pelicula.estreno not in self.listadoEstrenos:
                 self.listadoEstrenos.append(pelicula.estreno)
-        print("Configuración realizada con éxito")
-    
+        for pelicula in self.listadoPeliculas:
+            aux = pelicula.genero
+            for genero in aux:
+                aux2 = genero.lower().strip()
+                if aux2 not in self.listadoGeneros:
+                    self.listadoGeneros.append(aux2)
+        print("Configuración de base de datos realizada con éxito")
     
     def busqueda(self, titulo="ninguno", nombre="ninguno") -> bool:
         if titulo != "ninguno":
@@ -65,7 +71,8 @@ class App:
             return False
         else:
             for artista in self.listadoArtistas:
-                if artista.nombre == nombre:
+                artistaAux = artista.nombre
+                if artistaAux == nombre:
                     return True
             return False
     
@@ -90,14 +97,15 @@ class App:
                 for linea in lineas:
                     partes = linea.strip().split(";")
                     if len(partes) == 4:
-                        titulo = partes[0]
+                        titulo = partes[0].strip()
                         existePelicula = self.busqueda(titulo, "ninguno")
                         if existePelicula is False:    
                             actores = partes[1].strip().split(",")
-                            estreno = partes[2]
-                            genero = partes[3]
+                            actores2 = [x.strip() for x in actores]
+                            estreno = partes[2].strip()
+                            genero = partes[3].strip().split(",")
                             pelicula = Pelicula(titulo, estreno, genero)
-                            for actor in actores:
+                            for actor in actores2:
                                 existeArtista = self.busqueda("ninguno", actor)
                                 if existeArtista is not True:
                                     artista = Artista(actor)
@@ -250,15 +258,7 @@ class App:
     # apartado de filtros
     def filtro(self, llave, tipo) -> list:
         listaAux = []
-        if tipo == "artista":
-            # for que busca las peliculas que coincidan con el nombre del artísta
-            for pelicula in self.listadoPeliculas:
-                nombresArtistas = pelicula.verArtistas()
-                for nombre in nombresArtistas:
-                    if nombre == llave:
-                        listaAux.append(pelicula)
-            return listaAux
-        elif tipo == "estreno":
+        if tipo == "estreno":
             # for que busca las peliculas que coincidan con el año de estreno
             for pelicula in self.listadoPeliculas:
                 if pelicula.estreno == llave:
@@ -267,8 +267,11 @@ class App:
         else:
             # for que busca las peliculas que coincidan con el género
             for pelicula in self.listadoPeliculas:
-                if pelicula.genero == llave:
-                    listaAux.append(pelicula)
+                aux = pelicula.genero
+                for genero in aux:
+                    aux2 = genero.lower().strip()
+                    if aux2 == llave and aux2 not in listaAux:
+                        listaAux.append(pelicula)
             return listaAux
     
     # el filtro falta verificar que se aniden las peliculas
@@ -283,26 +286,17 @@ class App:
                     diccionarioAux = {"artista": artistaAux, "indice": i+1}
                     listadoAuxDiccionarios.append(diccionarioAux)
             elif tipo == "estreno":
-                listadoAuxEstrenos = []
-                j = 0
-                for i in range(len(self.listadoPeliculas)):
-                    estreno = self.listadoPeliculas[i].estreno
-                    if estreno not in listadoAuxEstrenos:
-                        print(f" {i+1}. peliculas estranadas en el año {estreno}")
-                        diccionarioAux = {"estreno": estreno, "indice": i+1}
-                        listadoAuxDiccionarios.append(diccionarioAux)
-                        listadoAuxEstrenos.append(estreno)
-                    else:
-                        j += 1
+                for i in range(len(self.listadoEstrenos)):
+                    estreno = self.listadoEstrenos[i]
+                    print(f" {i+1}. peliculas estrenadas en {estreno}")
+                    diccionarioAux = {"estreno": estreno, "indice": i+1}
+                    listadoAuxDiccionarios.append(diccionarioAux)
             else:
-                listadoAuxGeneros = []
-                for i in range(len(self.listadoPeliculas)):
-                    genero = self.listadoPeliculas[i].genero
-                    if genero not in listadoAuxGeneros:
-                        print(f" {i+1}. peliculas del genero {genero}")
-                        diccionarioAux = {"genero": genero, "indice": i+1}
-                        listadoAuxDiccionarios.append(diccionarioAux)
-                        genero.append(genero)
+                for i in range(len(self.listadoGeneros)):
+                    genero = self.listadoGeneros[i]
+                    print(f" {i+1}. peliculas del genero {genero}")
+                    diccionarioAux = {"genero": genero, "indice": i+1}
+                    listadoAuxDiccionarios.append(diccionarioAux)
             print(" 0. Salir ")
             print("-"*30)
             print()
@@ -310,6 +304,7 @@ class App:
             while True:
                 try:
                     option = int(input("Ingrese el número del artísta por el que desea filtrar: "))
+                    print()
                     if option <= (len(listadoAuxDiccionarios)+1) and option >= 0:
                         break
                 except:
@@ -319,39 +314,39 @@ class App:
                     break
             peliculasAux = []
             filtro = None
-            for elemento in range(len(listadoAuxDiccionarios)):
-                if tipo == "artista":
-                    indiceArtista = listadoAuxDiccionarios[elemento]["indice"]
-                    artistaAux = listadoAuxDiccionarios[elemento]["artista"]
-                    if option == indiceArtista:
-                        peliculasAux = self.filtro(artistaAux.nombre, "artista")
-                        filtro = artistaAux
+            if tipo == "artista":
+                for i in range(len(listadoAuxDiccionarios)+1):
+                    indiceAux = listadoAuxDiccionarios[i]["indice"]
+                    artistaAux = listadoAuxDiccionarios[i]["artista"]
+                    if option == indiceAux:
+                        peliculasAux = artistaAux.verPeliculas()
+                        filtro = artistaAux.nombre
                         break
-                elif tipo == "estreno":
-                    indiceEstreno = listadoAuxDiccionarios[elemento]["indice"]
-                    estrenoAux = listadoAuxDiccionarios[elemento]["estreno"]
-                    if option == indiceEstreno:
+                print(f"las peliculas en las que participa el artista {filtro} son: ", peliculasAux)
+                break
+            elif tipo == "estreno":
+                for i in range(len(listadoAuxDiccionarios)+1):
+                    indiceAux = listadoAuxDiccionarios[i]["indice"]
+                    estrenoAux = listadoAuxDiccionarios[i]["estreno"]
+                    if option == indiceAux:
                         peliculasAux = self.filtro(estrenoAux, "estreno")
                         filtro = estrenoAux
                         break
-                else:
-                    indiceGenero = listadoAuxDiccionarios[elemento]["indice"]
-                    generoAux = listadoAuxDiccionarios[elemento]["genero"]
-                    if option == indiceGenero:
+                print(f"las peliculas estrenadas en el año {filtro} son: ")
+                for x in peliculasAux:
+                    print(x.titulo)
+                break
+            else:
+                for i in range(len(listadoAuxDiccionarios)+1):
+                    indiceAux = listadoAuxDiccionarios[i]["indice"]
+                    generoAux = listadoAuxDiccionarios[i]["genero"]
+                    if option == indiceAux:
                         peliculasAux = self.filtro(generoAux, "genero")
                         filtro = generoAux
                         break
-            if tipo == "artista":
-                print(f"las peliculas en las que participa el artista {filtro.nombre} son: ", peliculasAux)
-                print()
-                break
-            elif tipo == "estreno":
-                print(f"las peliculas estrenadas en el año {filtro} son: ", peliculasAux)
-                print()
-                break
-            else:
-                print(f"las peliculas del genero {filtro} son: ", peliculasAux)
-                print()
+                print(f"las peliculas del genero {filtro} son: ")
+                for x in peliculasAux:
+                    print(x.titulo)
                 break
                 
     def filtrado(self):
@@ -359,10 +354,12 @@ class App:
         print("1. filtrar por actor")
         print("2. filtrar por estreno")
         print("3. filtrar por genero")
+        print()
         option = None
         while True:
             try:
-                option = int(input("ingrese el numero de la opcion que desea")) 
+                option = int(input("ingrese el numero de la opcion que desea: ")) 
+                print()
                 if option >=1 and option <=3:
                     break
             except:
@@ -380,8 +377,37 @@ class App:
             print()
     
     # apartado de graphviz
-    def grafica(self):
-        pass
+    def crear_grafo(self):
+        grafo = Digraph()
+        
+        # para almacenar todos los nodos que se han creado
+        nodos = {}
+        
+        # Agregar nodos de peliculas
+        for pelicula in self.listadoPeliculas:
+            #grafo.node(identificador de nodo,etiquetas , atributos)
+            grafo.node(pelicula.titulo, f"Titulo: {pelicula.titulo}\nEstreno: {pelicula.estreno}\nGenero: {pelicula.genero}", shape="box", style="filled", color="lightgreen")
+            # verificando la lista de artistas
+            for artista in pelicula.artistas:
+                if artista.nombre not in nodos:
+                    # si no existe el artista en el diccionario, se crea
+                    nodos[artista.nombre] = []
+                nodos[artista.nombre].append(pelicula.titulo)
+        
+        #conectando los nodos de artistas con las peliculas
+        for artista, peliculas in nodos.items():
+            grafo.node(artista, shape="box", style="filled", color="skyblue")
+            for pelicula in peliculas:
+                # relacionando los nodos
+                # grafo.edge(nodoPrincipal, nodoSecundario, atributos)
+                # el formato anterior es para que la flecha vaya de la pelicula al artista/s
+                grafo.edge(pelicula, artista, color="black")
+                
+        #ajustando
+        grafo.attr(rankdir="LR", splines="ortho")
+        
+        #guardando
+        grafo.render("digrama de relaciones Pelicula-Artista", format="jpg", view=True)
     
     # menu principal y de bienvenida
     def menu(self):
@@ -392,13 +418,13 @@ class App:
             print(" 3. Filtrar información ")
             print(" 4. Gráfico ")
             print(" 5. Salir ")
-            print(" 6. Ver base de datos ")
             print("-"*67)
             print()
             option = ""
             while True:
                 try:
                     option = int(input("Ingrese el número de la opción a la que desea ingresar: "))
+                    print()
                     if option > 0 and option <= 6:
                         break
                 except:
@@ -410,11 +436,12 @@ class App:
                 print()
             elif option == 2:
                 self.gestion()
+                print()
             elif option == 3:
                 self.filtrado()
                 print()
             elif option == 4:
-                self.grafica()
+                self.crear_grafo()
                 print()
             elif option == 5:
                 print("Gracias por utilizar el programa <3")
@@ -438,8 +465,7 @@ class App:
 if __name__ == '__main__':
     app = App()
     app.bienvenida()
-    #input("Presione Enter para continuar...")
-    # borrar la siguiente línea al momento de entregar
+    input("Presione Enter para continuar...")
     app.carga("pruebas.lfp")
     app.carga("pruebas2.lfp")
     app.configurarListados()
