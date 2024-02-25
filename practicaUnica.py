@@ -200,10 +200,12 @@ class App:
                 try:
                     if clave == "nombre":
                         option = int(input("Ingrese el número de la pelicula para ver los artistas que participan: "))
+                        print()
                         if option <= (len(self.listadoPeliculas)+1) and option >= 0:
                             break
                     else:
                         option = int(input("Ingrese el número del artísta, para ver las peliculas en las que participa: "))
+                        print()
                         if option <= (len(self.listadoArtistas)+1) and option >= 0:
                             break
                 except:
@@ -238,7 +240,7 @@ class App:
             while True:
                 try:
                     option = int(input("Ingrese el número de la opción a la que desea ingresar: "))
-                    if option == 1 or option == 2 or option == 3:
+                    if option >= 1 and option <= 3:
                         break
                 except:
                     print()
@@ -322,7 +324,10 @@ class App:
                         peliculasAux = artistaAux.verPeliculas()
                         filtro = artistaAux.nombre
                         break
-                print(f"las peliculas en las que participa el artista {filtro} son: ", peliculasAux)
+                print(" * "*5,f"peliculas en las que participa {filtro}"," * "*5)
+                for x in peliculasAux:
+                    print(x)
+                print(" * "*25)
                 break
             elif tipo == "estreno":
                 for i in range(len(listadoAuxDiccionarios)+1):
@@ -332,9 +337,10 @@ class App:
                         peliculasAux = self.filtro(estrenoAux, "estreno")
                         filtro = estrenoAux
                         break
-                print(f"las peliculas estrenadas en el año {filtro} son: ")
+                print(" * "*5,f"peliculas estrenadas en el año {filtro}"," * "*5)
                 for x in peliculasAux:
                     print(x.titulo)
+                print(" * "*23)
                 break
             else:
                 for i in range(len(listadoAuxDiccionarios)+1):
@@ -344,43 +350,52 @@ class App:
                         peliculasAux = self.filtro(generoAux, "genero")
                         filtro = generoAux
                         break
-                print(f"las peliculas del genero {filtro} son: ")
+                print(" * "*5,f"peliculas del genero {filtro}", " * "*5)
                 for x in peliculasAux:
                     print(x.titulo)
+                print(" * "*23)
                 break
                 
     def filtrado(self):
-        print("-"*15," Filtrado de películas ","-"*15)
-        print("1. filtrar por actor")
-        print("2. filtrar por estreno")
-        print("3. filtrar por genero")
-        print()
-        option = None
         while True:
-            try:
-                option = int(input("ingrese el numero de la opcion que desea: ")) 
+            print("-"*15," Filtrado de películas ","-"*15)
+            print("1. filtrar por artista")
+            print("2. filtrar por estreno")
+            print("3. filtrar por genero")
+            print("4. Salir")
+            print()
+            option = None
+            while True:
+                try:
+                    option = int(input("ingrese el numero de la opcion que desea: ")) 
+                    print()
+                    if option >=1 and option <=4:
+                        break
+                except:
+                    print("error al ingresar la opcion intentelo nuevamente.")
+                    print("-"*30)
+                    print()
+            if option == 1:
+                self.gestionFiltros("artista")
                 print()
-                if option >=1 and option <=3:
-                    break
-            except:
-                print("error al ingresar la opcion intentelo nuevamente.")
-                print("-"*30)
+            elif option == 2:
+                self.gestionFiltros("estreno")
                 print()
-        if option == 1:
-            self.gestionFiltros("artista")
-            print()
-        elif option == 2:
-            self.gestionFiltros("estreno")
-            print()
-        else:
-            self.gestionFiltros("genero")
-            print()
+            elif option == 3:
+                self.gestionFiltros("genero")
+                print()
+            elif option == 4:
+                break
+            else:
+                print("Ingrese el número correspondiente a la opción que desea seleccionar")
+                print()
     
     # apartado de graphviz
     def crear_grafo(self):
+        # creando el objeto grafo dirigido
         grafo = Digraph()
         
-        # para almacenar todos los nodos que se han creado
+        # diccionario de nodos
         nodos = {}
         
         # Agregar nodos de peliculas
@@ -403,12 +418,15 @@ class App:
                 # el formato anterior es para que la flecha vaya de la pelicula al artista/s
                 grafo.edge(pelicula, artista, color="black")
                 
-        #ajustando
+        # configuracion del grafo
         grafo.attr(rankdir="LR", splines="ortho")
-        
-        #guardando
+        #guardando el grafo como jpg y abriendolo en el visor de imagenes
         grafo.render("digrama de relaciones Pelicula-Artista", format="jpg", view=True)
-    
+        # confirmando que el grafo fue exitoso
+        print(" * "*10)
+        print("Grafico creado correctamente")
+        print(" * "*10)
+        
     # menu principal y de bienvenida
     def menu(self):
         while True:
@@ -466,8 +484,13 @@ if __name__ == '__main__':
     app = App()
     app.bienvenida()
     input("Presione Enter para continuar...")
+    print()
+    print("-"*30,"carga de archivos de prueba","-"*30)
     app.carga("pruebas.lfp")
     app.carga("pruebas2.lfp")
+    print("-"*30, "Listado de películas", "-"*30)
     app.configurarListados()
+    print("-"*80)
+    print()
     app.menu()
         
