@@ -3,42 +3,28 @@ from graphviz import Digraph
 
 # clases para peliculas y artistas
 class Pelicula:
-    def __init__(self, titulo="vacio", estreno="vacio", genero="vacio"):
+    def __init__(self, titulo, estreno, genero):
         self.titulo = titulo
         self.artistas = []
         self.estreno = estreno
         self.genero = genero
     
-    # me devuelve una lista solamente con los nombres de los artistas que participan en la pelicula
     def verArtistas(self) -> list:
-        listadoAux = [] # solo para imprimir
+        listadoAux = []
         for artista in self.artistas:
             listadoAux.append(artista.nombre)
         return listadoAux
-    
-    def sobreEscribirArtista(self, nombre, objeto) -> None:
-        for i in range(len(self.artistas)):
-            if self.artistas[i].nombre == nombre:
-                self.artistas[i] = objeto
-                break
    
 class Artista:
     def __init__(self, nombre):
         self.nombre = nombre
         self.peliculas = []
     
-    # me devuelve una lista solamente con los nombres de las peliculas en las que participa el artista
     def verPeliculas(self) -> list:
-        listadoAux = [] # solo para imprimir
+        listadoAux = []
         for pelicula in self.peliculas:
             listadoAux.append(pelicula.titulo)
         return listadoAux
-    
-    def sobreEscribirPelicula(self, titulo, objeto) -> None:
-        for i in range(len(self.peliculas)):
-            if self.peliculas[i].titulo == titulo:
-                self.peliculas[i] = objeto
-                break
 
 # clase principal
 class App:
@@ -451,6 +437,9 @@ class App:
             if option == 1:
                 RutaArchivo = input("Ingrese el nombre del archivo que desea cargar: ")
                 self.carga(RutaArchivo)
+                print("-"*30, "Listado de películas", "-"*30)
+                self.configurarListados()
+                print("-"*80)
                 print()
             elif option == 2:
                 self.gestion()
