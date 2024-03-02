@@ -37,16 +37,22 @@ class App:
     
     # apartado de carga de archivos 
     def configurarListados(self):
-        for pelicula in self.listadoPeliculas:
-            if pelicula.estreno not in self.listadoEstrenos:
-                self.listadoEstrenos.append(pelicula.estreno)
-        for pelicula in self.listadoPeliculas:
-            aux = pelicula.genero
-            for genero in aux:
-                aux2 = genero.lower().strip()
-                if aux2 not in self.listadoGeneros:
-                    self.listadoGeneros.append(aux2)
-        print("Configuración de base de datos realizada con éxito")
+        try:
+            for pelicula in self.listadoPeliculas:
+                if pelicula.estreno not in self.listadoEstrenos:
+                    self.listadoEstrenos.append(pelicula.estreno)
+            for pelicula in self.listadoPeliculas:
+                aux = pelicula.genero
+                for genero in aux:
+                    aux2 = genero.lower().strip()
+                    if aux2 not in self.listadoGeneros:
+                        self.listadoGeneros.append(aux2)
+            print("-"*30,"configuración de listados","-"*30)
+            print("La configuración de los listados fue exitosa")
+            print("-"*90)
+        except Exception as e:
+            print(f"Error: {e}")
+            print("intentelo nuevamente, verifique que el archivo contenga el formato correcto")
     
     def busqueda(self, titulo="ninguno", nombre="ninguno") -> bool:
         if titulo != "ninguno":
@@ -133,10 +139,12 @@ class App:
                             else:
                                 continue
             # si no se genera ningún error se imprime el mensaje de carga exitosa y se cierra el archivo automáticamente
-                      
+            print("-"*30,"carga de archivos de prueba","-"*30)
             print("Carga realizada con éxito")
+            self.configurarListados()
         except Exception as e:
             print(f"Error: {e}")
+            print("intentelo nuevamente, verifique el nombre y extensión del archivo")
             print()
     
     # apartado de gestión de peliculas y artistas
@@ -166,52 +174,56 @@ class App:
         print()
         
     def gestionInformacion(self,clave) -> None:
-        listadoAuxDiccionarios = []
+        listadoAuxiliar = []
         while True:
-            print("-"*30, f"mostrar peliculas según {clave}", "-"*30)
+            if clave == "nombre":
+                print(" * "*7,f"listado de películas"," * "*7)
+            else:
+                print("-"*20, f"información de películas", "-"*20)
             for i in range(len(self.listadoPeliculas)):
                 if clave == "nombre":
+                    print(f"{self.listadoPeliculas[i].titulo}")
+                    listadoAuxiliar.append(self.listadoPeliculas[i])
+                else:
                     print(f" {i+1}. {self.listadoPeliculas[i].titulo}")
                     diccionarioAux = {"pelicula": self.listadoPeliculas[i], "indice": i+1}
-                    listadoAuxDiccionarios.append(diccionarioAux)
-                else:
-                    print(f" {i+1}. {self.listadoArtistas[i].nombre}")
-                    diccionarioAux = {"artista": self.listadoArtistas[i], "indice": i+1}
-                    listadoAuxDiccionarios.append(diccionarioAux)
-            print(" 0. Salir ")
-            print("-"*30)
-            print()
+                    listadoAuxiliar.append(diccionarioAux)
+            if clave == "artistas":
+                print(" 0. Salir ")
+                print("-"*75)
+                print()
             option = ""
             while True:
                 try:
-                    if clave == "nombre":
-                        option = int(input("Ingrese el número de la pelicula para ver los artistas que participan: "))
+                    if clave == "artistas":
+                        option = int(input("Ingrese el número de la película, para ver su información: "))
                         print()
                         if option <= (len(self.listadoPeliculas)+1) and option >= 0:
                             break
                     else:
-                        option = int(input("Ingrese el número del artísta, para ver las peliculas en las que participa: "))
-                        print()
-                        if option <= (len(self.listadoArtistas)+1) and option >= 0:
-                            break
+                        break
                 except:
                     print()
                     print("Ingrese el número correspondiente a la opción que desea seleccionar")
             if option == 0:
                 break
-            for elemento in range(len(listadoAuxDiccionarios)):
-                if clave == "nombre":
-                    peliculaAux = listadoAuxDiccionarios[elemento]["pelicula"]
-                    indicePelicula = listadoAuxDiccionarios[elemento]["indice"]
+            if clave == "artistas":
+                print(" * "*10,f"Información"," * "*10)
+                for elemento in range(len(listadoAuxiliar)):
+                    peliculaAux = listadoAuxiliar[elemento]["pelicula"]
+                    indicePelicula = listadoAuxiliar[elemento]["indice"]
                     if option == indicePelicula:
-                        print("la pelicula: ", peliculaAux.titulo, "cuenta con los artístas: ", peliculaAux.verArtistas())
+                        print("la pelicula: ", peliculaAux.titulo)
+                        lista = ""
+                        for x in peliculaAux.verArtistas():
+                            lista += x + ", "
+                        print(f"cuenta con los artístas: {lista}")
                         break
-                else:
-                    artistaAux = listadoAuxDiccionarios[elemento]["artista"]
-                    indiceArtista = listadoAuxDiccionarios[elemento]["indice"]
-                    if option == indiceArtista:
-                        print("el artísta: ", artistaAux.nombre, "participa en las peliculas: ", artistaAux.verPeliculas())
-                        break
+                print(" * "*25)
+            else:
+                print(" * "*20)
+                print(f"el total de peliculas en sistema es de: {len(listadoAuxiliar)}")
+                print(" * "*20)
             break
             
     def gestion(self):
@@ -226,11 +238,12 @@ class App:
             while True:
                 try:
                     option = int(input("Ingrese el número de la opción a la que desea ingresar: "))
+                    print()
                     if option >= 1 and option <= 3:
                         break
                 except:
-                    print()
                     print("Ingrese el número correspondiente a la opción que desea seleccionar")
+                    print()
             if option == 1:
                 self.gestionInformacion("nombre")
                 print()
@@ -378,37 +391,31 @@ class App:
     
     # apartado de graphviz
     def crear_grafo(self):
-        # creando el objeto grafo dirigido
+        # creando grafo y nodos
         grafo = Digraph()
-        
-        # diccionario de nodos
         nodos = {}
         
         # Agregar nodos de peliculas
         for pelicula in self.listadoPeliculas:
             #grafo.node(identificador de nodo,etiquetas , atributos)
-            grafo.node(pelicula.titulo, f"Titulo: {pelicula.titulo}\nEstreno: {pelicula.estreno}\nGenero: {pelicula.genero}", shape="box", style="filled", color="lightgreen")
+            grafo.node(pelicula.titulo, f"Titulo: {pelicula.titulo}", shape="box", style="filled", color="lightgreen")
             # verificando la lista de artistas
             for artista in pelicula.artistas:
                 if artista.nombre not in nodos:
                     # si no existe el artista en el diccionario, se crea
-                    nodos[artista.nombre] = []
-                nodos[artista.nombre].append(pelicula.titulo)
+                    nodos[artista.nombre] = artista.verPeliculas()
+                else:
+                    continue
         
         #conectando los nodos de artistas con las peliculas
         for artista, peliculas in nodos.items():
             grafo.node(artista, shape="box", style="filled", color="skyblue")
             for pelicula in peliculas:
-                # relacionando los nodos
-                # grafo.edge(nodoPrincipal, nodoSecundario, atributos)
-                # el formato anterior es para que la flecha vaya de la pelicula al artista/s
                 grafo.edge(pelicula, artista, color="black")
-                
-        # configuracion del grafo
+        
+        # configurando el grafo
         grafo.attr(rankdir="LR", splines="ortho")
-        #guardando el grafo como jpg y abriendolo en el visor de imagenes
         grafo.render("digrama de relaciones Pelicula-Artista", format="jpg", view=True)
-        # confirmando que el grafo fue exitoso
         print(" * "*10)
         print("Grafico creado correctamente")
         print(" * "*10)
@@ -437,9 +444,6 @@ class App:
             if option == 1:
                 RutaArchivo = input("Ingrese el nombre del archivo que desea cargar: ")
                 self.carga(RutaArchivo)
-                print("-"*30, "Listado de películas", "-"*30)
-                self.configurarListados()
-                print("-"*80)
                 print()
             elif option == 2:
                 self.gestion()
@@ -474,12 +478,7 @@ if __name__ == '__main__':
     app.bienvenida()
     input("Presione Enter para continuar...")
     print()
-    print("-"*30,"carga de archivos de prueba","-"*30)
     app.carga("pruebas.lfp")
-    app.carga("pruebas2.lfp")
-    print("-"*30, "Listado de películas", "-"*30)
-    app.configurarListados()
-    print("-"*80)
     print()
     app.menu()
         
