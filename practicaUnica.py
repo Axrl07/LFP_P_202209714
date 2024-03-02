@@ -68,6 +68,21 @@ class App:
                     return True
             return False
     
+    def sobreescritura(self, titulo="ninguno", nombre="ninguno") -> object:
+        if titulo != "ninguno":
+            for pelicula in self.listadoPeliculas:
+                if pelicula.titulo == titulo:
+                # si existe entonces me devuelve su objeto
+                    return pelicula
+            return None
+        else:
+            for artista in self.listadoArtistas:
+                artistaAux = artista.nombre
+                if artistaAux == nombre:
+                    return artista
+            return None
+        
+        
     def retorno(self, titulo="ninguno", nombre="ninguno") -> object:
         if titulo != "ninguno":
             for pelicula in self.listadoPeliculas:
@@ -110,9 +125,23 @@ class App:
                                     pelicula.artistas.append(artista)
                             self.listadoPeliculas.append(pelicula)
                         else:
-                            print(f"La película:")
-                            print(pelicula.titulo, pelicula.estreno, pelicula.genero)
-                            print("con los artístas: ", pelicula.verArtistas())
+                            peliculaAux = self.sobreescritura(titulo, "ninguno")
+                            actores = partes[1].strip().split(",")
+                            actores2 = [x.strip() for x in actores]
+                            estreno = partes[2].strip()
+                            genero = partes[3].strip().split(",")
+                            
+                            print("-"*20,f"Coincidencia Encontrada", "-"*20)
+                            print("El registro ingresado es:")
+                            print(f"Titulo de la película: {titulo}")
+                            print(f"estrenada en el año: {estreno} y del género: {genero}.")
+                            print(f"con los artístas: {actores2}")
+                            print("-"*60)
+                            print("El registro en sistema es:")
+                            print(f"Titulo de la película: {peliculaAux.titulo}")
+                            print(f"estrenada en el año: {peliculaAux.estreno} y del género: {peliculaAux.genero}.")
+                            print(f"con los artístas: {peliculaAux.verArtistas()}")
+                            print("-"*60)
                             while True:
                                 respuesta = input("desea sobreescribir los datos de la pelicula? (s/n)")
                                 if respuesta.lower() == "s" or respuesta.lower() == "n":
@@ -120,11 +149,8 @@ class App:
                                 print("Ingrese únicamente s o n")
                             if respuesta.lower() == "s":
                                 self.listadoPeliculas.remove(self.retorno(titulo, "ninguno"))
-                                actores = partes[1].strip().split(",")
-                                estreno = partes[2]
-                                genero = partes[3]
                                 pelicula = Pelicula(titulo, estreno, genero)
-                                for actor in actores:
+                                for actor in actores2:
                                     existeArtista = self.busqueda("ninguno", actor)
                                     if existeArtista is not True:
                                         artista = Artista(actor)
@@ -214,10 +240,16 @@ class App:
                     indicePelicula = listadoAuxiliar[elemento]["indice"]
                     if option == indicePelicula:
                         print("la pelicula: ", peliculaAux.titulo)
+                        print(f"fue estrenada en el año: {peliculaAux.estreno}")
+                        if len(peliculaAux.genero) > 1:
+                            print("cuenta con los géneros: ", peliculaAux.genero)
                         lista = ""
                         for x in peliculaAux.verArtistas():
+                            if x == peliculaAux.verArtistas()[-1]:
+                                lista += x
+                                print(f"y los artístas que participan en ella son: {lista}")
+                                break
                             lista += x + ", "
-                        print(f"cuenta con los artístas: {lista}")
                         break
                 print(" * "*25)
             else:
@@ -478,7 +510,11 @@ if __name__ == '__main__':
     app.bienvenida()
     input("Presione Enter para continuar...")
     print()
+    # comentar para la presentación
     app.carga("pruebas.lfp")
+    app.carga("pruebaAux.lfp")
+    app.carga("pruebas2.lfp")
+    #
     print()
     app.menu()
         
